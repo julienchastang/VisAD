@@ -11,8 +11,13 @@ License  GPL, LGPL, BSD
 NB: In order to get the ViSAD project migrated to Maven, I had to prune out the following directories from the original VisAD SVN repo
 
 Jama/
+
 dods/clients/
+
 dods/dap/test/
+
 dods/servers/
+
 dods/servlet/
+
 gnu/regexp/util/
