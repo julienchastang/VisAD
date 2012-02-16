@@ -8,6 +8,8 @@ License: LGPL
 
 <img src="http://www.unidata.ucar.edu/software/idv/gallery/IDV_Nov200Z_wind.jpg" alt="Screenshot 1" />
 
+<img src="http://homepages.mcs.vuw.ac.nz/~elvis/db/images/c489/VisAD2_pro.jpg" alt="Screenshot 2" />
+
 NB: In order to get the VisAD project migrated to Maven, I had to prune out the following directories from the original VisAD SVN repo
 
 Jama/<br />
