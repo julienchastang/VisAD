@@ -2,7 +2,7 @@
 
 This is a git mirror of the [VisAD project](http://www.ssec.wisc.edu/~billh/visad.html) built by Bill Hibbard and the Space Science and Engineering Center at the University of Wisconsin-Madison.
 
-License  GPL, LGPL, BSD
+License: LGPL
 
 ### Screenshots
 
