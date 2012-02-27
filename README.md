@@ -6,6 +6,8 @@ License: LGPL
 
 ### Screenshots
 
+<img src="http://www.ucar.edu/highlights/2007/images/globe2.jpg" alt="Screenshot 0" />
+
 <img src="http://www.unidata.ucar.edu/software/idv/gallery/IDV_Nov200Z_wind.jpg" alt="Screenshot 1" />
 
 <img src="http://homepages.mcs.vuw.ac.nz/~elvis/db/images/c489/VisAD2_pro.jpg" alt="Screenshot 2" />
