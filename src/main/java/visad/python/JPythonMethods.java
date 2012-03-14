@@ -2983,6 +2983,148 @@ public static void plot(final String name, final float[][] data)
     }
   }
 
+  /** construct a Field containing the computed area
+  *   of each data point
+  * @param f VisAD data object (FlatField or FieldImpl) as source
+  * 
+  * @return FlatField of the computed areas
+  *
+  */
+  public static FlatField createAreaField(FieldImpl f)
+        throws VisADException, RemoteException {
+
+    Set ds = null;
+    if (f instanceof FlatField) {
+      ds = ((FlatField)f).getDomainSet();
+    } else {
+      ds = ( (FlatField)(f.getSample(0))).getDomainSet();
+    }
+    CoordinateSystem cs;
+
+    float[][] xes;
+    float[][] yes;
+    if (ds instanceof Linear2DSet) {
+      xes = ((Linear2DSet)ds).getX().getSamples(false);
+      yes = ((Linear2DSet)ds).getY().getSamples(false);
+      cs = ds.getCoordinateSystem();
+    } else {
+      xes = ((Linear3DSet)ds).getX().getSamples(false);
+      yes = ((Linear3DSet)ds).getY().getSamples(false);
+      cs = ((CartesianProductCoordinateSystem)ds.getCoordinateSystem()).getCoordinateSystems()[0];
+      throw new VisADException("Must use 2D data to compute area...");
+    }
+
+    int nx = xes[0].length;
+    int ny = yes[0].length;
+
+    float[][] area = new float[1][nx * ny];
+    float[][] lats = new float[nx][ny];
+    float[][] lons = new float[nx][ny];
+
+    double[][] xy = new double[2][1];
+    double[][] latlon = new double[2][1];
+    for (int x=0; x<nx; x++) {
+      for (int y=0; y<ny; y++) {
+        xy[0][0] = xes[0][x];
+        xy[1][0] = yes[0][y];
+        latlon = cs.toReference(xy);
+        lats[x][y] = (float)latlon[0][0];
+        lons[x][y] = (float)latlon[1][0];
+      }
+    }
+
+    int k = 0;
+    for (int x=1; x<nx-1; x++) {
+      for (int y=1; y<ny-1; y++) {
+        k = x + nx*y;
+        area[0][k] = lats[x][y];
+
+        // a = cos(lat)*(dlon) * (dlat) * 111.1^2  (km per degree of lat)
+        // dlat and dlon are over 2 points...so 111.1/2 * 111.1/2 = 3085.8025
+        
+        area[0][k] = (float) Math.abs(3085.8025 * (lats[x][y-1] - lats[x][y+1]) * Math.cos(lats[x][y]*.01745329252) * (lons[x+1][y] - lons[x-1][y]));
+
+      }
+    }
+
+    // now fix up the edges
+    k = nx*(ny-1);
+    for (int x=0; x<nx; x++) {
+      area[0][x] = area[0][x+nx];
+      area[0][x+k] = area[0][x+k-nx];
+    }
+    for (int y=0; y<ny; y++) {
+      k = nx*y;
+      area[0][k] = area[0][k+1];
+      area[0][k+nx-1] = area[0][k+nx-2];
+    }
+
+    // Now create the VisAD FlatField...
+    MathType domain = ((SetType) ds.getType()).getDomain();
+    Unit u = null;
+    try { u = makeUnit("km2"); } 
+    catch (Exception e) { }
+
+    RealType range = makeRealType("area",u);
+    FunctionType ftype = new FunctionType(domain, range);
+    FlatField field = new FlatField(ftype, ds);
+    field.setSamples(area,false);
+    lats = null;
+    lons = null;
+    return field;
+  }
+
+  /** Sum up the values of each point named in the list (see
+  *   "createAreaField" method)
+  *
+  * @param f VisAD FlatField containing the values to be summed at each point
+  * @param list an array of points to be used to sum up the values
+  *    (see the "find" method)
+  * 
+  * @return the summation of the data values defined in the list
+  *
+  */
+  public static double computeSum(FlatField f, int[] list) 
+             throws VisADException, RemoteException {
+    float [][] dv = f.getFloats(false);
+
+    double sum = 0.0;
+    for (int i=0; i<list.length; i++) {
+      if (!Float.isNaN(dv[0][list[i]])) sum = sum + dv[0][list[i]];
+    }
+    return sum;
+  }
+
+  /** Compute the average of each point named in the list (see
+  *   "createArea" method)
+  *
+  * @param f VisAD FlatField containing the values to be averaged at each point
+  * @param list an array of points to be used to compute the average values
+  *    (see the "find" method)
+  * 
+  * @return the average of the data values defined in the list
+  *
+  */
+  public static double computeAverage(FlatField f, int[] list) 
+             throws VisADException, RemoteException {
+    float [][] dv = f.getFloats(false);
+
+    double sum = 0.0;
+    double count =0.0;
+    for (int i=0; i<list.length; i++) {
+      if (!Float.isNaN(dv[0][list[i]])) {
+        sum = sum + dv[0][list[i]];
+        count = count + 1;
+      }
+    }
+
+    if (count > 0.0) {
+      return (sum/count);
+    } else {
+      return Double.NaN;
+    }
+  }
+
   /**
   * Mask out values outside testing limits in a FieldImpl
   *
@@ -3671,7 +3813,7 @@ public static void plot(final String name, final float[][] data)
    * @throws RemoteException 
   *
   */
-  public static ByteArrayOutputStream sdumpTypes(Data d) 
+  public static ByteArrayOutputStream whatTypes(Data d) 
              throws VisADException, RemoteException {
       MathType t = d.getType();
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -3696,6 +3838,7 @@ public static void plot(final String name, final float[][] data)
   /** helper method for dumpMathType() only
   * This just dumps out the MathType of the Data object into
   * a ByteArrayOutputStream which is returned.
+  *
   * @param d is the Data object
    * @return 
    * @throws VisADException 
@@ -3703,7 +3846,7 @@ public static void plot(final String name, final float[][] data)
   *
   *
   */
-  public static ByteArrayOutputStream sdumpType(Data d) 
+  public static ByteArrayOutputStream whatType(Data d) 
              throws VisADException, RemoteException {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       MathType t = d.getType();
