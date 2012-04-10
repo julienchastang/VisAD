@@ -2724,6 +2724,38 @@ public static void plot(final String name, final float[][] data)
   }
 
   /**
+  * Replaces all the given values in a FlatField with the missing value (Float.NaN);
+  *
+  * @param f is the input FlatField
+  * @param v is the value to replace with NaN.
+   * @return 
+   * @throws VisADException 
+   * @throws RemoteException 
+  */
+  public static FlatField setToMissing(FieldImpl f, double v) 
+             throws VisADException, RemoteException {
+    FlatField ff;
+    if (f instanceof FlatField) {
+      try {
+      ff = (FlatField)f.clone();
+      } catch (CloneNotSupportedException cns) {
+        throw new VisADException ("Cannot clone field object");
+      }
+     
+    } else {
+      ff = (FlatField)((FlatField)f.getSample(0)).clone();
+    }
+    float [][] dv = ff.getFloats(false);
+    for (int i=0; i<dv[0].length; i++) {
+      if (dv[0][i] == v) dv[0][i] = Float.NaN;
+    }
+
+    ff.setSamples(dv,false);
+    return ff;
+
+  }
+
+  /**
   * Replaces all the missing values in a FlatField with the constant given
   *
   * @param f is the input FlatField
@@ -3144,12 +3176,35 @@ public static void plot(final String name, final float[][] data)
   */
   public static FieldImpl mask(FieldImpl f, String op, double v) 
              throws VisADException, RemoteException {
-    return mask(f, op, new Real(v));
+    return mask(f, op, new Real(v), false);
+  }
+
+  /**
+  * Mask out values outside testing limits in a FieldImpl
+  *
+  * @param f  VisAD data object (FlatField or FieldImpl) as source
+  * @param op  Comparison operator as string ('gt','le',...)
+  * @param v  Numeric operand for comparison
+  * @param useNan  if true, then NaN is used instead of zero for result. 
+  *
+  * @return a FieldImpl with values of either 0 (did not meet
+  * criterion) or 1 (met criteron).
+  *
+  * Example:  b = mask(a, 'gt', 100)
+  * if 'a' is an image, 'b' will be an image with values of
+  * 1 where 'a' was > 100, and zero elsewhere.
+   * @throws VisADException 
+   * @throws RemoteException 
+  *
+  */
+  public static FieldImpl mask(FieldImpl f, String op, double v, boolean useNaN) 
+             throws VisADException, RemoteException {
+    return mask(f, op, new Real(v), useNaN);
   }
 
 
   /**
-   * 
+   *  Mask out values outside testing limits...
    * 
    * @param f
    * @param op
@@ -3163,7 +3218,7 @@ public static void plot(final String name, final float[][] data)
     if (! (f instanceof FieldImpl) ) {
       throw new VisADException("Data must be a FieldImpl or FlatField");
     }
-    return mask((FieldImpl)f, op, v);
+    return mask((FieldImpl)f, op, v, false);
   }
 
 
@@ -3190,21 +3245,52 @@ public static void plot(final String name, final float[][] data)
   */
   public static FieldImpl mask(FieldImpl f, String op, Data v)
              throws VisADException, RemoteException {
+
+     return mask(f, op, v, false);
+  }
+
+
+  /**
+  * Mask out values outside testing limits in a FieldImpl
+  *
+  * @param f  VisAD data object (FlatField or FieldImpl) as source
+  * @param op  Comparison operator as string ('gt','le',...)
+  * @param v  VisAd operand for comparison.
+  * @param useNaN if true, then NaN will be used for "false"
+  *
+  * If the value of 'v' is a Field, then it will be resampled
+  * to the domain of 'f' is possible before the comparison.
+  *
+  * @return a FieldImpl with values of either 0 or NaN (did not meet
+  * criterion) or 1 (met criteron).
+  *
+  * Example:  b = mask(a, 'gt', c)
+  * if 'a' is an image, 'b' will be an image with values of
+  * 1 where 'a' was > the corresponding value of 'c', and zero or NaN
+  * elsewhere.
+   * @throws VisADException 
+   * @throws RemoteException 
+  *
+  */
+  public static FieldImpl mask(FieldImpl f, String op, Data v, boolean useNaN)
+             throws VisADException, RemoteException {
     FlatField ff = null;
     FieldImpl fi = null;
     boolean isFI = false;
     int numItems;
+    Set ds = null;
+    float fail = 0.0f;
+    if (useNaN) fail = Float.NaN;
+
     if (f instanceof FlatField) {
       numItems = 1;
+      ds = ((FlatField)f).getDomainSet();
      
     } else if (domainDimension(f) == 1) {
       isFI = true;
-      try {
-        fi = (FieldImpl)f.clone();
-        numItems = getDomainSizes(fi)[0];
-      } catch (CloneNotSupportedException cnsfi) {
-        throw new VisADException ("Cannot clone FieldImpl object");
-      }
+      numItems = getDomain(f).getLength();
+      ds = ( (FlatField)(f.getSample(0))).getDomainSet();
+
     } else {
       throw new VisADException("Cannot rescale the data - unknown structure");
     }
@@ -3215,78 +3301,215 @@ public static void plot(final String name, final float[][] data)
       if (ops_sym[i].equalsIgnoreCase(op)) oper = i;
     }
     if (oper < 0) throw new VisADException("Invalid operator: "+op);
+
+    MathType domain = ((SetType) ds.getType()).getDomain();
+    Unit u = null;
+    try { u = makeUnit(""); } 
+    catch (Exception e) { }
+
+    RealType range = makeRealType("mask",u);
+    FunctionType ftype = new FunctionType(domain, range);
+    FlatField field = new FlatField(ftype, ds);
+
+    if (isFI) {
+      Set dsfi = f.getDomainSet();
+      MathType dsdom = ((SetType) f.getDomainSet().getType()).getDomain();
+      FunctionType dsft = new FunctionType(dsdom, ftype);
+      fi = new FieldImpl(dsft, dsfi);
+    }
+    
     float[][] dv;
+    boolean isReal = false;
+    float vv = 0.0f;
+
+    if (v.getType() == visad.RealType.Generic) {
+      isReal = true;
+      vv = (float)((Real)v).getValue();
+    }
 
     for (int m=0; m<numItems; m++) {
-      if (isFI) {
-        ff =  (FlatField)((fi.getSample(m)).subtract(v));
+      
+      if (isReal) {
+        if (isFI) {
+          ff =  (FlatField)(f.getSample(m));
+
+        } else {
+          ff = (FlatField)f;
+        }
+
       } else {
-        ff = (FlatField) f.subtract(v);
+
+        if (isFI) {
+          ff =  (FlatField)((f.getSample(m)).subtract(v));
+
+        } else {
+          ff = (FlatField) f.subtract(v);
+        }
+
       }
 
-      dv = ff.getFloats(false);
+      // get copy of values for comparison...will replace with results.
+      dv = ff.getFloats(true);
 
       for (int i=0; i<dv.length; i++) {
         for (int k=0; k<dv[i].length; k++) {
           if (oper == 0) {
-            if (dv[i][k] > 0.0f) {
+            if (dv[i][k] > vv) {
               dv[i][k] = 1.0f;
             } else {
-              dv[i][k] = 0.0f;
+              dv[i][k] = fail;
             }
           } else if (oper == 1) {
-            if (dv[i][k] >= 0.0f) {
+            if (dv[i][k] >= vv) {
               dv[i][k] = 1.0f;
             } else {
-              dv[i][k] = 0.0f;
+              dv[i][k] = fail;
             }
           } else if (oper == 2) {
-            if (dv[i][k] < 0.0f) {
+            if (dv[i][k] < vv) {
               dv[i][k] = 1.0f;
             } else {
-              dv[i][k] = 0.0f;
+              dv[i][k] = fail;
             }
           } else if (oper == 3) {
-            if (dv[i][k] <= 0.0f) {
+            if (dv[i][k] <= vv) {
               dv[i][k] = 1.0f;
             } else {
-              dv[i][k] = 0.0f;
+              dv[i][k] = fail;
             }
           } else if (oper == 4) {
-            if (dv[i][k] == 0.0f) {
+            if (dv[i][k] == vv) {
               dv[i][k] = 1.0f;
             } else {
-              dv[i][k] = 0.0f;
+              dv[i][k] = fail;
             }
           } else if (oper == 5) {
-            if (dv[i][k] != 0.0f) {
+            if (dv[i][k] != vv) {
               dv[i][k] = 1.0f;
             } else {
-              dv[i][k] = 0.0f;
+              dv[i][k] = fail;
             }
           } else {
-            if (dv[i][k] != 0.0f) {
+            if (dv[i][k] != vv) {
               dv[i][k] = 1.0f;
             } else {
-              dv[i][k] = 0.0f;
+              dv[i][k] = fail;
             }
           }
         }
       }
 
+      field.setSamples(dv,false);
+
       if (isFI) {
-        ( (FlatField)(fi.getSample(m))).setSamples(dv,false);
-      } else {
-        ff.setSamples(dv,false);
+        fi.setSample(m, field);
       }
     }
 
     if (isFI) {
       return fi;
     } else {
-      return (FieldImpl)ff;
+      return (FieldImpl)field;
     }
   }
+
+  /**
+  * Mask out values outside the given range
+  *
+  * @param f  VisAD data object (FlatField or FieldImpl) as source
+  * @param vmin The lower limit of the range
+  * @param vmax  The upper limit of the range
+  * @param useNaN  Set to true to use NaN as the "outside the range" value; otherwise, use zero.
+  *
+  * The range is exclusive; that is vmin < values < vmax 
+  *
+  * @return a FieldImpl with values of either 0 (or NaN, meaning: did not meet
+  * criterion) or 1 (met criteron).
+  *
+  * Example:  b = maskWithinRange(a, 100, 200, true)
+  * if 'a' is an image, 'b' will be an image with values of
+  * 1 where values in 'a' were between 'vmin' and 'vmax' and zero (or NaN)
+  * elsewhere.
+  *
+  * @throws VisADException 
+  * @throws RemoteException 
+  *
+  */
+  public static FieldImpl maskWithinRange(FieldImpl f, double vmin, double vmax, boolean useNaN)
+             throws VisADException, RemoteException {
+
+    FieldImpl fi = null;
+    boolean isFI = false;
+    int numItems;
+    Set ds = null;
+    float fail = 0.0f;
+    if (useNaN) fail = Float.NaN;
+
+    if (f instanceof FlatField) {
+      numItems = 1;
+      ds = ((FlatField)f).getDomainSet();
+     
+    } else if (domainDimension(f) == 1) {
+      isFI = true;
+      numItems = getDomain(f).getLength();
+      ds = ( (FlatField)(f.getSample(0))).getDomainSet();
+
+    } else {
+      throw new VisADException("Cannot rescale the data - unknown structure");
+    }
+
+    MathType domain = ((SetType) ds.getType()).getDomain();
+    Unit u = null;
+    try { u = makeUnit(""); } 
+    catch (Exception e) { }
+
+    RealType range = makeRealType("mask",u);
+    FunctionType ftype = new FunctionType(domain, range);
+    FlatField field = new FlatField(ftype, ds);
+
+    if (isFI) {
+      Set dsfi = f.getDomainSet();
+      MathType dsdom = ((SetType) f.getDomainSet().getType()).getDomain();
+      FunctionType dsft = new FunctionType(dsdom, ftype);
+      fi = new FieldImpl(dsft, dsfi);
+    }
+    
+    float[][] dv;
+
+    for (int m=0; m<numItems; m++) {
+      
+      if (isFI) {
+        dv = ((FlatField)(f.getSample(m))).getFloats(true);
+
+      } else {
+        dv = ((FlatField)f).getFloats(true);
+      }
+
+      // get copy of values for comparison...will replace with results.
+
+      for (int i=0; i<dv.length; i++) {
+        for (int k=0; k<dv[i].length; k++) {
+          if (dv[i][k] > vmin && dv[i][k] < vmax) {
+            dv[i][k] = 1.0f;
+          } else {
+            dv[i][k] = fail;
+          }
+        }
+      }
+
+      field.setSamples(dv,false);
+      if (isFI) {
+        fi.setSample(m, field);
+      }
+    }
+
+    if (isFI) {
+      return fi;
+    } else {
+      return (FieldImpl)field;
+    }
+  }
+
 
   /**
   * Get a list of points where a comparison is true.
@@ -3309,6 +3532,7 @@ public static void plot(final String name, final float[][] data)
              throws VisADException, RemoteException {
     return find(f, op, new Real(v));
   }
+
 
   /**
   * Get a list of points where a comparison is true.
@@ -3340,7 +3564,6 @@ public static void plot(final String name, final float[][] data)
       fv = (FlatField) (((FieldImpl)f).getSample(0)).subtract(v);
     }
     float [][] dv = fv.getFloats(false);
-//    Vector z = new Vector();
     List<Integer> zz = new ArrayList<Integer>(fv.getLength());
     int oper = -1;
     for (int i=0; i<ops.length; i++) {
@@ -3352,21 +3575,6 @@ public static void plot(final String name, final float[][] data)
     for (int i=0; i<1; i++) {
       for (int k=0; k<dv[i].length; k++) {
 
-//        if (oper == 0) {
-//            if (dv[i][k] > 0.0f) z.addElement(new Integer(k));
-//        } else if (oper == 1) {
-//            if (dv[i][k] >= 0.0f) z.addElement(new Integer(k));
-//        } else if (oper == 2) {
-//            if (dv[i][k] < 0.0f) z.addElement(new Integer(k));
-//        } else if (oper == 3) {
-//            if (dv[i][k] <= 0.0f) z.addElement(new Integer(k));
-//        } else if (oper == 4) {
-//            if (dv[i][k] == 0.0f) z.addElement(new Integer(k));
-//        } else if (oper == 5) {
-//            if (dv[i][k] != 0.0f) z.addElement(new Integer(k));
-//        } else {
-//            if (dv[i][k] != 0.0f) z.addElement(new Integer(k));
-//        }
         if (oper == 0) {
           if (dv[i][k] > 0.0f) zz.add(Integer.valueOf(k));
         } else if (oper == 1) {
@@ -3382,6 +3590,48 @@ public static void plot(final String name, final float[][] data)
         } else {
           if (dv[i][k] != 0.0f) zz.add(Integer.valueOf(k));
         }
+      }
+    }
+
+    int m = zz.size();
+    int[] rv = new int[m];
+    for (int i=0; i<m; i++) {
+      rv[i] = zz.get(i).intValue();
+    }
+    return rv;
+  }
+
+  /**
+  * Get a list of points where values fall within the given range
+  *
+  * @param f  VisAD data object (usually FlatField) as source
+  * @param vmin The minimum value for the range
+  * @param vmax  The maximum value for the range
+  *
+  * @return an int[] containing the sampling indecies where
+  * the values fall within the range ( vmin < value < vmax )
+  *
+  * Example:  b = findWithinRange(a, 100, 200)
+  * if 'a' is an image, 'b' will be a list of indecies in
+  * 'a' where the values are greater than 'vmin' and less than 'vmax'
+  *
+  * @throws VisADException 
+  * @throws RemoteException 
+  *
+  */
+  public static int[] findWithinRange(FieldImpl f, double vmin, double vmax)
+             throws VisADException, RemoteException {
+    float[][] dv;
+    if (f instanceof FlatField) {
+      dv = ((FlatField)f).getFloats(false);
+    } else {
+      dv = ((FlatField)(f.getSample(0))).getFloats(false);
+    }
+    List<Integer> zz = new ArrayList<Integer>(dv[0].length);
+
+    for (int i=0; i<1; i++) {
+      for (int k=0; k<dv[i].length; k++) {
+        if (dv[i][k] > vmin && dv[i][k] < vmax) zz.add(Integer.valueOf(k));
       }
     }
 
