@@ -2,7 +2,11 @@
 
 This is a git mirror of the [VisAD project](http://www.ssec.wisc.edu/~billh/visad.html) built by Bill Hibbard and the Space Science and Engineering Center at the University of Wisconsin-Madison.
 
+You may get compilation errors related to not finding Java 3D. In this case, you will have to [install](http://download.java.net/media/java3d/builds/release/1.5.1/README-download.html) Java 3D into your JRE.
+
 License: LGPL
+
+
 
 ### Screenshots
 
