@@ -38,12 +38,5 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>javax.java3d</groupId>
-      <artifactId>j3dcore</artifactId>
-      <version>1.5.1</version>
-      <scope>system</scope>
-      <systemPath>${java.home}/lib/ext/j3dcore.jar</systemPath>
-    </dependency>
   </dependencies>
 </project>
