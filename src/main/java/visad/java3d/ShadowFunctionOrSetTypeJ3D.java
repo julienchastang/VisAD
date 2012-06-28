@@ -273,8 +273,7 @@ public class ShadowFunctionOrSetTypeJ3D extends ShadowTypeJ3D {
       return Texture2D.RGB;
     }
     else if (buffImgType == BufferedImage.TYPE_BYTE_GRAY) {
-      return Texture2D.INTENSITY;
-    //-return Texture2D.LUMINANCE; Not sure if this matters?
+      return Texture2D.LUMINANCE;
     }
     return Texture2D.RGBA;
   }
@@ -518,15 +517,22 @@ public class ShadowFunctionOrSetTypeJ3D extends ShadowTypeJ3D {
   public void textureToGroup(Object group, VisADGeometryArray array,
                             BufferedImage image, GraphicsModeControl mode,
                             float constant_alpha, float[] constant_color,
+                            int texture_width, int texture_height, boolean byReference, boolean yUp, VisADImageTile tile) throws VisADException {
+    textureToGroup(group, array, image, mode, constant_alpha, constant_color, texture_width, texture_height, byReference, yUp, tile, false);
+  }
+
+  public void textureToGroup(Object group, VisADGeometryArray array,
+                            BufferedImage image, GraphicsModeControl mode,
+                            float constant_alpha, float[] constant_color,
                             int texture_width, int texture_height) throws VisADException {
-    textureToGroup(group, array, image, mode, constant_alpha, constant_color, texture_width, texture_height, false, false, null);
+    textureToGroup(group, array, image, mode, constant_alpha, constant_color, texture_width, texture_height, false, false, null, false);
   }
 
   public void textureToGroup(Object group, VisADGeometryArray array,
                             BufferedImage image, GraphicsModeControl mode,
                             float constant_alpha, float[] constant_color,
                             int texture_width, int texture_height, 
-                            boolean byReference, boolean yUp, VisADImageTile tile)
+                            boolean byReference, boolean yUp, VisADImageTile tile, boolean smoothen)
          throws VisADException {
     GeometryArray geometry = display.makeGeometry(array);
     // System.out.println("texture geometry");
@@ -538,15 +544,14 @@ public class ShadowFunctionOrSetTypeJ3D extends ShadowTypeJ3D {
       c_alpha = null;
     }
     else if (constant_alpha == constant_alpha) {
-      // c_alpha = new TransparencyAttributes(mode.getTransparencyMode(),
       c_alpha = new TransparencyAttributes(TransparencyAttributes.BLENDED,
-                                           constant_alpha);
-	c_alpha.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE); //REUSE GEOMETRY/COLORBYTE REQUIREMENT
+                                (image.getType() == BufferedImage.TYPE_BYTE_GRAY)? (1.0f - constant_alpha): constant_alpha);
+      c_alpha.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE); //REUSE GEOMETRY/COLORBYTE REQUIREMENT
     }
     else {
       c_alpha = new TransparencyAttributes();
       c_alpha.setTransparencyMode(TransparencyAttributes.BLENDED);
-	c_alpha.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE); //REUSE GEOMETRY/COLORBYTE REQUIREMENT
+      c_alpha.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE); //REUSE GEOMETRY/COLORBYTE REQUIREMENT
     }
     ColoringAttributes c_color = null;
     if (constant_color != null && constant_color.length == 3) {
@@ -560,11 +565,13 @@ public class ShadowFunctionOrSetTypeJ3D extends ShadowTypeJ3D {
     TextureAttributes texture_attributes = new TextureAttributes();
 
     // WLH 20 June 2001
-    texture_attributes.setTextureMode(TextureAttributes.REPLACE);
-    // texture_attributes.setTextureMode(TextureAttributes.MODULATE);
+    if (smoothen) {
+      texture_attributes.setTextureMode(TextureAttributes.MODULATE);
+    } else {
+      texture_attributes.setTextureMode(TextureAttributes.REPLACE);
+    }
 
-    texture_attributes.setPerspectiveCorrectionMode(
-                          TextureAttributes.NICEST);
+    texture_attributes.setPerspectiveCorrectionMode(TextureAttributes.NICEST);
     appearance.setTextureAttributes(texture_attributes);
     // create Texture2D
 // TextureLoader uses 1st argument = 1
@@ -596,8 +603,14 @@ System.out.println("Texture.BASE_LEVEL_LINEAR = " + Texture.BASE_LEVEL_LINEAR); 
     texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
     texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
 */
-    texture.setMinFilter(Texture.BASE_LEVEL_POINT);
-    texture.setMagFilter(Texture.BASE_LEVEL_POINT);
+    if (smoothen) {
+      texture.setMinFilter(Texture.BASE_LEVEL_LINEAR);
+      texture.setMagFilter(Texture.BASE_LEVEL_LINEAR);
+    } else {
+      texture.setMinFilter(Texture.BASE_LEVEL_POINT);
+      texture.setMagFilter(Texture.BASE_LEVEL_POINT);
+    }
+
     texture.setEnable(true);
     // end of from TextureLoader
     //
