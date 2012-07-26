@@ -1148,19 +1148,30 @@ public class Gridded3DSet extends GriddedSet {
       float sx = mySamples[0][gii];
       float sy = mySamples[1][gii];
       float sz = mySamples[2][gii];
-      if ((Math.sqrt((v_x - sx) * (v_x - sx)) > 0.4 * Math
-          .sqrt((mySamples[0][0] - mySamples[0][ii])
-              * (mySamples[0][0] - mySamples[0][ii])))
-          || (Math.sqrt((v_y - sy) * (v_y - sy)) > 0.4 * Math
-              .sqrt((mySamples[1][0] - mySamples[1][ii])
-                  * (mySamples[1][0] - mySamples[1][ii])))
-          || (Math.sqrt((v_z - sz) * (v_z - sz)) > 0.4 * Math
-              .sqrt((mySamples[2][0] - mySamples[2][ii])
-                  * (mySamples[2][0] - mySamples[2][ii])))) {
-        float[] ginit = getStartPoint(value[0][i], value[1][i], value[2][i]);
-        gx = (int) ginit[0];
-        gy = (int) ginit[1];
-        gz = (int) ginit[2];
+      //GHANSHAM: Added this if condition. It tries to get start point
+      //when i = 0 (first time) or when the last guess is not a valid value
+      if (i == 0 || ((i != 0) && grid[0][i - 1] != grid[0][i - 1])) {
+        if (Math.abs(v_x-sx) > 0.4 *Math.abs(mySamples[0][0] - mySamples[0][ii]) ||
+            Math.abs(v_y-sy) > 0.4 *Math.abs(mySamples[1][0] - mySamples[1][ii]) ||
+            Math.abs(v_z-sz) > 0.4 *Math.abs(mySamples[2][0] - mySamples[2][ii])) {
+          float[] ginit = getStartPoint(value[0][i], value[1][i], value[2][i]);
+          gx = (int) ginit[0];
+          gy = (int) ginit[1];
+          gz = (int) ginit[2];
+        }
+      } else { //GHANSHAM: Use the last guest other wise
+          gx = (int) grid[0][i-1];
+          gy = (int) grid[1][i-1];
+          gz = (int) grid[2][i-1];
+          if (gx > LengthX - 2) {
+             gx = LengthX - 2;
+          }
+          if (gy > LengthY - 2) {
+             gy = LengthY - 2;
+          }
+          if (gz > LengthZ - 2) {
+             gz = LengthZ - 2;
+          }
       }
       // ----
       for (int itnum = 0; itnum < 2 * (LengthX + LengthY + LengthZ); itnum++) {
@@ -2415,6 +2426,16 @@ public class Gridded3DSet extends GriddedSet {
         default_intervals = intervals;
       }
       float[] display_intervals = smap[0].scaleValues(default_intervals);
+      //TDR, 7-19-12: invert display intervals for inverted range 
+      double[] rng = smap[0].getRange();
+      float[] display_intervals_for_invert_range = new float[display_intervals.length];
+      if (rng[0] > rng[1]) {  // - inverted
+        for (int q=0; q<display_intervals.length-1; q++) {
+           display_intervals_for_invert_range[q] = display_intervals[q+1];
+        }
+        display_intervals_for_invert_range[display_intervals.length-1] = display_intervals[display_intervals.length-1];
+        display_intervals = display_intervals_for_invert_range;
+      }
       BaseColorControl color_control = (BaseColorControl) smap[0].getControl();
       float[][] temp = null;
       try {
