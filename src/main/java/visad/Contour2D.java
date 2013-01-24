@@ -139,7 +139,7 @@ public class Contour2D {
 			boolean[] swap, boolean fill, float[][][] grd_normals,
 			byte[][] interval_colors, float[][][][] lbl_vv,
 			byte[][][][] lbl_cc, float[][][] lbl_loc, double[] scale, double scale_ratio,
-			double label_size, boolean labelAlign, byte[] labelColor,
+			int label_freq, double label_size, boolean labelAlign, byte[] labelColor,
 			Object labelFont, boolean sphericalDisplayCS,
 			Gridded3DSet spatial_set) throws VisADException {
 		boolean[] dashes = { false };
@@ -149,7 +149,7 @@ public class Contour2D {
 
 		contour(g, nr, nc, intervals, lowlimit, highlimit, base, dash,
 				auxValues, swap, fill, grd_normals, interval_colors, scale,
-				scale_ratio, label_size, labelAlign, labelColor, labelFont,
+				scale_ratio, label_freq, label_size, labelAlign, labelColor, labelFont,
 				sphericalDisplayCS, spatial_set);
 	}
 
@@ -231,7 +231,7 @@ public class Contour2D {
 			float[] values, float lowlimit, float highlimit, float base,
 			boolean dash, byte[][] auxValues, boolean[] swap, boolean fill,
 			float[][][] grd_normals, byte[][] interval_colors, double[] scale,
-			double scale_ratio, double label_size, boolean labelAlign,
+			double scale_ratio, int label_freq, double label_size, boolean labelAlign,
 			byte[] labelColor, Object labelFont, boolean sphericalDisplayCS,
 			Gridded3DSet spatial_set) throws VisADException {
 
@@ -466,7 +466,7 @@ public class Contour2D {
 		}
 
 		ContourStripSet ctrSet = new ContourStripSet(myvals, swap,
-				scale_ratio, label_size, nr, nc, spatial_set);
+				scale_ratio, label_freq, label_size, nr, nc, spatial_set);
 
 		visad.util.Trace.call1("Contour2d.loop", " nrm=" + nrm + " ncm=" + ncm
 				+ " naux=" + naux + " myvals.length=" + myvals.length);
@@ -1238,16 +1238,10 @@ public class Contour2D {
 					 */
 
 					if (ii == 6) { // - add last two pairs
-						ctrSet
-								.add(vx, vy, numv - 4, numv - 3, low + il, ir,
-										ic);
-						ctrSet
-								.add(vx, vy, numv - 2, numv - 1, low + il, ir,
-										ic);
+                                                ctrSet.add(vx, vy, numv - 4, numv - 3, low + il);
+                                                ctrSet.add(vx, vy, numv - 2, numv - 1, low + il);
 					} else {
-						ctrSet
-								.add(vx, vy, numv - 2, numv - 1, low + il, ir,
-										ic);
+                                                ctrSet.add(vx, vy, numv - 2, numv - 1, low + il);
 					}
 
 				} // for il -- NOTE: gg incremented in for statement
@@ -4256,6 +4250,8 @@ class ContourStripSet {
 	float[] levels;
 
 	int[][] labelIndexes;
+	
+	int labelFreq = ContourControl.LABEL_FREQ_LO;
 
 	/**           */
 	int n_levs;
@@ -4274,6 +4270,11 @@ class ContourStripSet {
 
 	/**           */
 	List<ContourStrip> vec;
+
+        /** Closed strips by level. */
+	List<ContourStrip>[] closedStripArray;
+
+        List<ContourStrip> closedStripList;
 
 	/**           */
 	boolean[] swap;
@@ -4310,14 +4311,16 @@ class ContourStripSet {
 	 * @throws VisADException
 	 */
 
-	ContourStripSet(float[] levels, boolean[] swap,
-			double scale_ratio, double label_size, int nr, int nc,
+	ContourStripSet(float[] levels, boolean[] swap, double scale_ratio,
+			int label_freq, double label_size, int nr, int nc,
 			Gridded3DSet spatial_set) throws VisADException {
 
 		this.levels = levels;
 		n_levs = levels.length;
 		labelIndexes = new int[n_levs][];
+		labelFreq = label_freq;
 		vecArray = new List[n_levs];
+                closedStripArray = new List[n_levs];
 		labelScale = ((0.062 * (1.0 / scale_ratio)) * label_size);
 		this.nr = nr;
 		this.nc = nc;
@@ -4326,6 +4329,7 @@ class ContourStripSet {
 
 		for (int kk = 0; kk < n_levs; kk++) {
 			vecArray[kk] = new ArrayList<ContourStrip>();
+			closedStripArray[kk] = new ArrayList<ContourStrip>();
 		}
 
 		qSet = new ContourQuadSet[n_levs];
@@ -4395,7 +4399,15 @@ class ContourStripSet {
 	 */
 	
 	void add(float[] vx, float[] vy, int idx0, int idx1, int lev_idx) {
+                float delx = vx[idx1] - vx[idx0];
+                float dely = vy[idx1] - vy[idx0];
+                // skip really small segments
+                if ((delx <= 0.0001 && delx >= -0.0001) && (dely <= 0.0001 && dely >= -0.0001)) {
+                    return;
+                }
+
 		vec = vecArray[lev_idx];
+                closedStripList = closedStripArray[lev_idx];
 		int n_strip = vec.size();
 
 		if (n_strip == 0) {
@@ -4409,6 +4421,11 @@ class ContourStripSet {
 				if (c_strp.addPair(vx, vy, idx0, idx1)) {
 					found_array[found] = kk;
 					found++;
+                                        if (c_strp.closed) { // take off main list, add to closed (done) list.
+                                           vec.remove(c_strp);
+                                           closedStripList.add(c_strp);
+                                           break;
+                                        }
 					// exit loop if we hit threshold value
 					if (found == 3) break;
 				}
@@ -4433,6 +4450,8 @@ class ContourStripSet {
 	}
 
 	/**
+         * Iterates over list of ContourStrips for each contour level index.
+         *
 	 * 
 	 * @param vx
 	 *            Grid coordinate values.
@@ -4459,13 +4478,13 @@ class ContourStripSet {
 	 * @throws VisADException
 	 */
 	
-	void getLineColorArrays(float[] vx, float[] vy, byte[][] colors,
+	void getLineColorArraysAtCntrLevel(float[] vx, float[] vy, byte[][] colors,
 			byte[] labelColor, Object labelFont, boolean labelAlign,
 			boolean sphericalDisplayCS, int lev_idx, boolean[] dashed)
 			throws VisADException {
 
+                // open strips (must end on grid boundary)
 		int n_strips = vecArray[lev_idx].size();
-
 		for (int kk = 0; kk < n_strips; kk++) {
 			ContourStrip cs = vecArray[lev_idx].get(kk);
 			cs.isDashed = dashed[lev_idx];
@@ -4473,9 +4492,21 @@ class ContourStripSet {
 					labelAlign, sphericalDisplayCS);
 		}
 
+                // closed strips
+                n_strips = closedStripArray[lev_idx].size();
+                for (int kk = 0; kk < n_strips; kk++) {
+                        ContourStrip cs = closedStripArray[lev_idx].get(kk);
+                        cs.isDashed = dashed[lev_idx];
+                        cs.getLabeledLineColorArray(vx, vy, colors, labelColor, labelFont,
+                                        labelAlign, sphericalDisplayCS);
+                }
+
+
 	}
 
 	/**
+         * Called just after the grid walking is complete.
+         *
 	 * @param vx
 	 * @param vy
 	 * @param colors
@@ -4498,11 +4529,13 @@ class ContourStripSet {
 			boolean sphericalDisplayCS, boolean[] dashFlags)
 			throws VisADException {
               
+                /* Don't use the tiling logic for now.
 		makeContourStrips(vx, vy);
+                */
 
 		// set the line and color arrays for each level
 		for (int kk = 0; kk < n_levs; kk++) {
-			getLineColorArrays(vx, vy, colors, labelColor, labelFont,
+			getLineColorArraysAtCntrLevel(vx, vy, colors, labelColor, labelFont,
 					labelAlign, sphericalDisplayCS, kk, dashFlags);
 		}
 
@@ -4639,6 +4672,8 @@ class ContourStrip {
 	/**           */
 	ContourStripSet css;
 
+        boolean closed = false;
+
 	/**
 	 * 
 	 * @param lev_idx
@@ -4655,6 +4690,7 @@ class ContourStrip {
 		idxs.addFirst(idx0, idx1);
 
 		this.css = css;
+		numLabels = css.labelFreq;
 	}
 
 	/**
@@ -4670,10 +4706,9 @@ class ContourStrip {
 	boolean addPair(float[] vx, float[] vy, int idx0, int idx1) {
 
 		// test for closed strip, bail out early if found
-		if ((idxs.numIndices > 2) && 
-			(vx[idxs.first.idx0] == vx[idxs.last.idx1]) && (vy[idxs.first.idx0] == vy[idxs.last.idx1])) {
-		     return false;
-		} 
+                if (closed) return false;
+ 
+                float delta = 0.001f;
 		   
 		float vx0 = vx[idx0];
 		float vy0 = vy[idx0];
@@ -4682,32 +4717,51 @@ class ContourStrip {
 
 		float vx_s = vx[idxs.first.idx0];
 		float vy_s = vy[idxs.first.idx0];
-		float dist = (vx0 - vx_s) * (vx0 - vx_s) + (vy0 - vy_s) * (vy0 - vy_s);
 
-		if (dist <= 0.00001) {
+                float delx = vx0 - vx_s;
+                float dely = vy0 - vy_s;
+                if ((delx > -delta && delx < delta) && (dely > -delta && dely < delta)) {
 			idxs.addFirst(idx1, idx0);
+                        setIsClosed(vx, vy);
 			return true;
 		}
-		dist = (vx1 - vx_s) * (vx1 - vx_s) + (vy1 - vy_s) * (vy1 - vy_s);
-		if (dist <= 0.00001) {
+                delx = vx1 - vx_s;
+                dely = vy1 - vy_s;
+                if ((delx > -delta && delx < delta) && (dely > -delta && dely < delta)) {
 			idxs.addFirst(idx0, idx1);
+                        setIsClosed(vx, vy);
 			return true;
 		}
 
 		vx_s = vx[idxs.last.idx1];
 		vy_s = vy[idxs.last.idx1];
-		dist = (vx0 - vx_s) * (vx0 - vx_s) + (vy0 - vy_s) * (vy0 - vy_s);
-		if (dist <= 0.00001) {
+                delx = vx0 - vx_s;
+                dely = vy0 - vy_s;
+                if ((delx > -delta && delx < delta) && (dely > -delta && dely < delta)) {
 			idxs.addLast(idx0, idx1);
+                        setIsClosed(vx, vy);
 			return true;
 		}
-		dist = (vx1 - vx_s) * (vx1 - vx_s) + (vy1 - vy_s) * (vy1 - vy_s);
-		if (dist <= 0.00001) {
+                delx = vx1 - vx_s;
+                dely = vy1 - vy_s;
+                if ((delx > -delta && delx < delta) && (dely > -delta && dely < delta)) {
 			idxs.addLast(idx1, idx0);
+                        setIsClosed(vx, vy);
 			return true;
 		}
+
 		return false;
 	}
+
+        /** Check if endpoints are equal and set the closed flag.
+         */
+        void setIsClosed(float[] vx, float[] vy) {
+           float delta = 0.001f;
+           float delx = vx[idxs.first.idx0] - vx[idxs.last.idx1];
+           float dely = vy[idxs.first.idx0] - vy[idxs.last.idx1];
+           closed = ((idxs.numIndices > 2) && (delx > -delta && delx < delta) && (dely > -delta && dely < delta));
+        }
+
 
 	/**
 	 * 
@@ -4727,11 +4781,69 @@ class ContourStrip {
 			byte[] labelColor, Object labelFont, boolean labelAlign,
 			boolean sphericalDisplayCS) throws VisADException {
 
-		float[][] vv = getLineArray(vx, vy);
-		byte[][] bb = getColorArray(colors);
+                boolean hasColors = (colors != null);
 
-		processLineArrays(vv, bb, labelColor, labelFont, labelAlign,
-				sphericalDisplayCS);
+		int linArrLen = idxs.getNumIndices();
+           
+		// break up each line into chunks according to label frequency
+		// Below heuristic can be tweaked if desired.  Just provides a
+		// label freq 1 to 9 mapping to point count for repeating the label
+
+                int labelRepeat = linArrLen;
+		switch (numLabels) {
+			case 1:
+				labelRepeat = linArrLen;
+				break;
+			case 3:
+				labelRepeat = 200;
+				break;
+			case 5:
+				labelRepeat = 150;
+				break;
+			case 7:
+				labelRepeat = 100;
+				break;
+			case 9:
+				labelRepeat = 50;
+				break;
+			default: 
+				labelRepeat = linArrLen;
+				break;
+		}
+		int labelCount = linArrLen / labelRepeat;
+		int labelRemain = linArrLen % labelRepeat;
+		int labelsDone = 0;
+
+		for (int i = 0; i < labelCount; i++) {
+
+                        int start = i*labelRepeat/2;
+                        int stop = start + labelRepeat/2 - 1;
+
+                        float[][] vvTmp = getLineArray(vx, vy, start, stop);
+                        byte[][] bbTmp = null;
+                        if (hasColors) {
+                           bbTmp = getColorArray(colors, start, stop);
+                        }
+
+			processLineArrays(vvTmp, bbTmp, labelColor, labelFont, labelAlign,
+					sphericalDisplayCS);
+			labelsDone++;
+		}
+		
+		if (labelRemain > 0) {
+
+                        int start = labelsDone*labelRepeat/2;
+                        int stop = start + labelRemain/2 - 1;
+
+                        float[][] vvTmp = getLineArray(vx, vy, start, stop);
+                        byte[][] bbTmp = null;
+                        if (hasColors) {
+                           bbTmp = getColorArray(colors, start, stop);
+                        }
+
+			processLineArrays(vvTmp, bbTmp, labelColor, labelFont, labelAlign,
+					sphericalDisplayCS);
+		}
 	}
 
 	/**
@@ -4777,7 +4889,8 @@ class ContourStrip {
 
 		float lbl_half = 0.1f;
 
-		if (totalPts > LBL_ALGM_THRESHHOLD && (((lev_idx & 1) == 1) || css.n_levs == 1)) {
+                isLabeled = false;
+		if (totalPts > LBL_ALGM_THRESHHOLD && ((lev_idx & 1) == 1 || css.n_levs == 1)) {
 			isLabeled = true;
 			loc = (vv[0].length) / 2; // - start at half-way pt.
 			int n_pairs_b = 1;
@@ -4932,7 +5045,7 @@ class ContourStrip {
 		if (start_break >= 4 && stop_break <= totalPts * 2 - 3)
 			doLabel = true;
 
-		if (doLabel && ((lev_idx & 1) == 1)) {
+		if (doLabel && isLabeled && ((lev_idx & 1) == 1 || css.n_levs == 1)) {
 
 			/*-------LABEL START --------------------*/
 			float[] ctr_u = null;
@@ -5434,6 +5547,38 @@ class ContourStrip {
 		return new float[][] { vvx, vvy };
 	}
 
+        /**
+         * Get a line array using this instances cached indexes from start to stop (0-based, inclusive).
+         * 
+         * @param vx
+         *            X values to apply cached indexes to.
+         * @param vy
+         *            Y values to apply cached indexes to.
+         * @param start
+         *            start pair index.
+         * @param stop
+         *            stop pair index.
+         * @see {@link VisADLineArray}
+         *
+         * @return
+         */
+        float[][] getLineArray(float[] vx, float[] vy, int start, int stop) {
+                if (vx == null || vy == null) {
+                        return null;
+                }
+                int[] idx_array = idxs.toArray(start, stop);
+
+                float[] vvx = new float[idx_array.length];
+                float[] vvy = new float[vvx.length];
+
+                for (int ii = 0; ii < idx_array.length; ii++) {
+                        vvx[ii] = vx[idx_array[ii]];
+                        vvy[ii] = vy[idx_array[ii]];
+                }
+                return new float[][] { vvx, vvy };
+        }
+
+
 	/**
 	 * Get line strip arrays for this strip.
 	 * 
@@ -5531,6 +5676,31 @@ class ContourStrip {
 		}
 		return new_colors;
 	}
+
+        /**
+         * Get the array of colors corresponding to cached indexes from start pair to stop pair (0-based, inclusive).
+         * 
+         * @param colors
+         *            Line array formatted colors where the first dimension is the
+         *            color dimension and the second the color values.
+         * @see {@link VisADLineArray}
+         * @return Array of colors in line array format.
+         */
+        byte[][] getColorArray(byte[][] colors, int start, int stop) {
+                if (colors == null)
+                        return null;
+                int clr_dim = colors.length;
+                int[] idx_array = idxs.toArray(start, stop);
+                byte[][] new_colors = new byte[clr_dim][idx_array.length];
+
+                for (int ii = 0; ii < idx_array.length; ii++) {
+                        for (int cc = 0; cc < clr_dim; cc++) {
+                                new_colors[cc][ii] = colors[cc][idx_array[ii]];
+                        }
+                }
+                return new_colors;
+        }
+
 
 	/**
 	 * Get the array of colors corresponding to cached indexes.
@@ -5814,6 +5984,10 @@ class IndexPairList {
 		numIndices = 0;
 	}
 
+        int getNumIndices() {
+              return numIndices;
+        }
+
 	/**
 	 * Return array of this lists indices. Each nodes idx0 precedes it's idx1
 	 * with a total array length of <code>numIndices</code>.
@@ -5832,4 +6006,28 @@ class IndexPairList {
 		}
 		return idxs;
 	}
+
+        /**
+         * Return array of this list's indices from start pair to stop pair index (0-based and inclusive). 
+         *
+         * @param start index of first pair.
+         * @param stop index of last pair.
+         * 
+         * @return array of length num of pairs (inclusive) times two.
+         */
+        int[] toArray(int start, int stop) {
+                int[] idxs = new int[(stop - start + 1)*2];
+                int pairIdx = 0;
+                Node n = first;
+                int cnt = 0;
+                while (pairIdx <= stop && n != null) {
+                     if (pairIdx >= start) {
+                        idxs[cnt++] = n.idx0;
+                        idxs[cnt++] = n.idx1;
+                     }
+                     n = n.next;
+                     pairIdx += 1;
+                }
+                return idxs;
+        }
 }
