@@ -10,14 +10,14 @@
   <url>http://www.ssec.wisc.edu/~billh/visad.html</url>
   <distributionManagement>
     <repository>
-      <id>thredds-releases</id>
-      <name>THREDDS Releases</name>
-      <url>http://artifacts.unidata.ucar.edu:8081/content/repositories/thredds-releases</url>
+      <id>unidata-releases</id>
+      <name>UNIDATA Releases</name>
+      <url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/</url>
     </repository>
     <snapshotRepository>
-      <id>thredds-snapshots</id>
-      <name>THREDDS Snapshots</name>
-      <url>http://artifacts.unidata.ucar.edu:8081/content/repositories/thredds-snapshots</url>
+      <id>unidata-snapshots</id>
+      <name>UNIDATA Snapshots</name>
+      <url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
   <repositories>
