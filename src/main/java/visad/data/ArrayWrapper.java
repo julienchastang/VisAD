@@ -1,6 +1,6 @@
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -34,8 +34,8 @@ public  class ArrayWrapper {
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+   
   public ArrayWrapper(byte[] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
@@ -45,8 +45,8 @@ public  class ArrayWrapper {
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(byte[][] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
@@ -57,8 +57,8 @@ public  class ArrayWrapper {
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(float[] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
@@ -68,21 +68,19 @@ public  class ArrayWrapper {
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(float[][] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
-
-
 
   /**
    * add the data to the cache
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(double[] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
@@ -92,21 +90,19 @@ public  class ArrayWrapper {
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(double[][] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
-
-
 
   /**
    * add the data to the cache
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(int[] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
@@ -116,21 +112,19 @@ public  class ArrayWrapper {
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(int[][] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
-
-
 
   /**
    * add the data to the cache
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(short[] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
@@ -140,12 +134,11 @@ public  class ArrayWrapper {
    *
    * @param values the values to add
    *
-   * @return the cache id
    */
+  
   public ArrayWrapper(short[][] values) {
       cacheId = DataCacheManager.getCacheManager().addToCache(values);
   }
-
 
     public boolean inMemory() {
 	return DataCacheManager.getCacheManager().inMemory(cacheId);

@@ -4,7 +4,7 @@
 
 /*
 This source file is part of the edu.wisc.ssec.mcidas package and is
-Copyright (C) 1998 - 2011 by Tom Whittaker, Tommy Jasmin, Tom Rink,
+Copyright (C) 1998 - 2014 by Tom Whittaker, Tommy Jasmin, Tom Rink,
 Don Murray, James Kelly, Bill Hibbard, Dave Glowacki, Curtis Rueden
 and others.
 
@@ -583,7 +583,7 @@ public class AddeURL implements Cloneable {
   /**
    * Clones this instance.
    *
-   * <p>This implementation never throws {@link CloneNotSupportException}.</p>
+   * <p>This implementation never throws CloneNotSupportException</p>
    *
    * @return                            A clone of this instance.
    * @throws CloneNotSupportedException if cloning isn't supported.

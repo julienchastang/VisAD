@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -26,7 +26,7 @@ MA 02111-1307, USA
 
 package visad;
 
-import java.rmi.*;
+import java.rmi.RemoteException;
 
 /**
    Action is the VisAD interface for runnable threads that need to be
@@ -58,8 +58,6 @@ public interface Action extends ThingChangedListener {
 
   /**
    * <p>Removes a link to a ThingReference.</p>
-   *
-   * <p>This implementation invokes {@link #findReference(ThingReference)}.</p>
    *
    * @param ref                   The reference to be removed.
    * @throws RemoteVisADException if the reference isn't a {@link

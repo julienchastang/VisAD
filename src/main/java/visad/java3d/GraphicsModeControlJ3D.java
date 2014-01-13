@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -95,6 +95,9 @@ public class GraphicsModeControlJ3D extends GraphicsModeControl {
 
   /** for merging geometries */
   private boolean mergeGeometries = false;
+
+  /** for depth buffer enabling */
+  private boolean depthBufferEnable = true;
 
   /**
    * Construct a GraphicsModeControlJ3D associated with the input display
@@ -621,6 +624,20 @@ public class GraphicsModeControlJ3D extends GraphicsModeControl {
     return polygonOffsetFactor;
   }
 
+  public void setDepthBufferEnable(boolean enable) 
+    throws VisADException, RemoteException {
+    this.depthBufferEnable = enable;
+    changeControl(true);
+    getDisplay().reDisplayAll();
+  }
+
+  public void setDepthBufferEnable(boolean enable, boolean noChange) {
+    this.depthBufferEnable = enable;
+  }
+
+  public boolean getDepthBufferEnable() {
+    return depthBufferEnable;
+  }
 
   /**
    * See whether missing values are rendered as transparent or not.
@@ -770,6 +787,7 @@ public class GraphicsModeControlJ3D extends GraphicsModeControl {
     mode.texture3DMode = texture3DMode;
     mode.cacheAppearances = cacheAppearances;
     mode.mergeGeometries = mergeGeometries;
+    mode.depthBufferEnable = depthBufferEnable;
     return mode;
   }
 

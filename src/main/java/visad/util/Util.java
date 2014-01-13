@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -206,8 +206,9 @@ public class Util {
   /**
    * Return a string representation of VisAD's build date and time.
    *
-   * @return 
+   * @return VisAD build date and time
    */
+  
   public static String getVersionDate() {
     try {
       InputStream is = Util.class.getResourceAsStream("/DATE");
@@ -227,7 +228,7 @@ public class Util {
    * @param canvas The Canvas3D to get properties from. If null Canvas3D
    *  properties are skipped.
    *
-   * @see {@link #printJ3DProperties(Canvas3D)}
+   * @see #printJ3DProperties(Canvas3D)
    */
   public static void printJ3DProperties(PrintStream str, Canvas3D canvas) {
     Map map = VirtualUniverse.getProperties();
@@ -250,8 +251,8 @@ public class Util {
    * @param canvas The Canvas3D to get properties from. If null Canvas3D
    *  properties are skipped.
    *
-   * @see {@link javax.media.j3d.VirtualUniverse#getProperties()}
-   * @see {@link javax.media.j3d.Canvas3D#queryProperties()}
+   * @see javax.media.j3d.VirtualUniverse#getProperties()
+   * @see javax.media.j3d.Canvas3D#queryProperties()
    */
   public static void printJ3DProperties(Canvas3D canvas) {
     printJ3DProperties(System.err, canvas);
@@ -355,10 +356,89 @@ public class Util {
   }
 
   /**
+   * Convert 10-bit data to 2-byte data
+   * @param input
+   * @param output
+   * @return 0 if no errors
+   */
+  public static int tenBitToTwoByte(byte [] input, short [] output) {
+
+	  int total = output.length;
+	  int index = 0;
+	  int temp = 0;
+	  int skip = 0;
+	  int outputIndex = 0;
+
+	  index = skip / 8;
+	  skip = skip % 8;
+	  //input = (unsigned char *) inp;
+
+	  while (total > 0)
+	  {
+		  total--;
+
+		  /*
+		   * enumerated to avoid the more general need
+		   * to always access 3 bytes
+		   * which in reality is needed only for case 7
+		   */
+		  switch (skip)
+		  {
+		  case 0:
+			  temp = 4 * (int) (input[index] & 0xFF) +  (int) (input[index + 1] & 0xFF) / 64;
+			  break;
+		  case 1:
+			  temp = 8 * (int) (input[index] & 0xFF) +  (int) (input[index + 1] & 0xFF) / 32;
+			  break;
+		  case 2:
+			  temp = 16 * (int) (input[index] & 0xFF) +  (int) (input[index + 1] & 0xFF) / 16;
+			  break;
+		  case 3:
+			  temp = 32 * (int) (input[index] & 0xFF) +  (int) (input[index + 1] & 0xFF) / 8;
+			  break;
+		  case 4:
+			  temp = 64 * (int) (input[index] & 0xFF) +  (int) (input[index + 1] & 0xFF) / 4;
+			  break;
+		  case 5:
+			  temp = 128 * (int) (input[index] & 0xFF) +  (int) (input[index + 1] & 0xFF) / 2;
+			  break;
+		  case 6:
+			  temp = 256 * (int) (input[index] & 0xFF) +  (int) (input[index + 1] & 0xFF);
+			  break;
+		  case 7:
+			  temp = 512 *(1& (int) (input[index] & 0xFF)) + 2 * (int) (input[index + 1] & 0xFF)
+			                                        + ( (int) (input[index + 2] & 0xFF) > 127 ? 1 : 0);
+			  break;
+		  }
+
+		  output[outputIndex] = (short) (temp & 0x3ff);
+		  outputIndex++;
+
+		  /*
+		   * these two statements together increment 10 bits on the input
+		   */
+		  index++;
+		  skip += 2;
+
+		  /*
+		   * now normalize skip
+		   */
+		  if (skip > 7)
+		  {
+			  index++;
+			  skip -= 8;
+		  }
+	  }
+
+	  return 0;
+  }
+  
+  /**
    * Return a string representation of the current date and time.
    *
-   * @return 
+   * @return string timestamp for current time
    */
+  
   public static String getTimestamp() {
     StringBuffer sb = new StringBuffer();
     Calendar cal = Calendar.getInstance();
@@ -395,8 +475,9 @@ public class Util {
   /**
    * Return a JFileChooser that recognizes supported VisAD file types.
    *
-   * @return 
+   * @return file chooser which recognizes supported VisAD file types
    */
+  
   public static JFileChooser getVisADFileChooser() {
     JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
     Vector filters = new Vector();
@@ -710,8 +791,9 @@ public class Util {
    * @param o1 
    * @param o2 
    *
-   * @return 
+   * @return true if the arrays are equal
    */
+  
   public static boolean arraysEqual(Object[] o1, Object[] o2) {
     // test for null
     if (o1 == null && o2 == null) return true;
@@ -736,12 +818,11 @@ public class Util {
   /**
    * Create a string representation of the given array
    *
-   *
    * @param prefix 
    * @param array  array to print
    *
-   * @return  array as a String
    */
+  
   public static void printArray(String prefix, Object[] array) {
     StringBuffer buf = new StringBuffer();
     buf.append(prefix);
@@ -837,8 +918,7 @@ public class Util {
 
   /**
    * Create a ConstantMap array of colors for use with
-   * @{link Display.addReference(DataReference, ConstantMap[])
-   *   Display.addReference()}
+   * {@link Display#addReference(DataReference, ConstantMap[])}
    *
    * @param color color to encode
    *
@@ -870,8 +950,8 @@ public class Util {
 
   /**
    * Configure basic logging for the visad package. In a production
-   * envirionment the prefered way to configure logging is using the
-   * logging.properties file. This is intended only as a convienience method
+   * environment the preferred way to configure logging is using the
+   * logging.properties file. This is intended only as a convenience method
    * for configuring console logging for the purposes of testing.
    *
    * @param verbosity 0 is <code>Level.WARNING</code> and progresses to a
@@ -916,12 +996,13 @@ public class Util {
   }
 
   /**
-   * @see {@link #configureLogging(int, java.lang.String)}
+   * @see #configureLogging(int, java.lang.String)
    *
    * @param verbosity 
    *
-   * @return 
+   * @return logging level
    */
+  
   public static Level configureLogging(int verbosity) {
     return configureLogging(verbosity, "visad");
   }

@@ -4,7 +4,7 @@
 
 /*
 This source file is part of the edu.wisc.ssec.mcidas package and is
-Copyright (C) 1998 - 2011 by Tom Whittaker, Tommy Jasmin, Tom Rink,
+Copyright (C) 1998 - 2014 by Tom Whittaker, Tommy Jasmin, Tom Rink,
 Don Murray, James Kelly, Bill Hibbard, Dave Glowacki, Curtis Rueden
 and others.
 
@@ -328,7 +328,7 @@ public final class McIDASUtil {
    *
    * @param val value to swap
    *
-   * @return 
+   * @return the flipped integer
    */
   public static int swbyt4(int val) {
     int[] vals = new int[] {val};
@@ -371,7 +371,7 @@ public final class McIDASUtil {
    * @param b	 array of 4 bytes
    * @param off is the offset into the byte array
    *
-   * @return 
+   * @return the integer value
    */
   public static int bytesToInteger(byte[] b, int off) {
 
@@ -389,7 +389,7 @@ public final class McIDASUtil {
    * @param off is the offset into the byte array
    * @param num number of integers to create
    *
-   * @return 
+   * @return the array of values as integers
    */
   public static int[] bytesToIntegerArray(byte[] b, int off, int num) {
 

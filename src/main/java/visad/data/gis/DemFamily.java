@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -26,8 +26,6 @@ MA 02111-1307, USA
 
 package visad.data.gis;
 
-
-
 import java.io.IOException;
 
 import java.rmi.RemoteException;
@@ -42,7 +40,6 @@ import visad.data.*;
 
 import java.net.URL;
 
-
 /**
  * A container for all the supported DEM types.  Currently, USGS
  * DEM and Arc ASCIIGRID formats are supported.
@@ -50,8 +47,8 @@ import java.net.URL;
  * <pre>
  *    Data data = new DemFamily("dems").open(string);
  * </pre>
- * @see  visad.data.gis.UsgsDemForm;
- * @see  visad.data.gis.ArcAsciiGridForm;
+ * @see  visad.data.gis.UsgsDemForm
+ * @see  visad.data.gis.ArcAsciiGridForm
  * @author Don Murray
  * @version $Revision: 1.6 $ $Date: 2009-03-02 23:35:48 $
  */

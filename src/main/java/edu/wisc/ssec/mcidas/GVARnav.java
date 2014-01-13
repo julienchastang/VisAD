@@ -4,7 +4,7 @@
 
 /*
 This source file is part of the edu.wisc.ssec.mcidas package and is
-Copyright (C) 1998 - 2011 by Tom Whittaker, Tommy Jasmin, Tom Rink,
+Copyright (C) 1998 - 2014 by Tom Whittaker, Tommy Jasmin, Tom Rink,
 Don Murray, James Kelly, Bill Hibbard, Dave Glowacki, Curtis Rueden
 and others.
  
@@ -73,9 +73,8 @@ public class GVARnav extends AREAnav
 
   private boolean isEastPositive = true;
 
-  final double PI=3.141592653589793d;
-  final double DEG=180.d/PI;
-  final double RAD=PI/180.d; // degrees to radians conversion pi/180
+  final double DEG=180.d/Math.PI;
+  final double RAD=Math.PI/180.d; // degrees to radians conversion pi/180
   final double NOMORB=42164.365d; // nominal radial distance of satellite (km)
   final double AE=6378.137d; // earth equatorial radius (km)
   final double FER=1.d-(6356.7533d/AE); // earth flattening coeff = 1-(be/ae)

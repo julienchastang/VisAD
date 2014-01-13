@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -26,30 +26,45 @@ MA 02111-1307, USA
 
 package visad;
 
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
 
-import java.rmi.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.UnmarshalException;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Vector;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
-import java.awt.print.*;
-
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import visad.browser.Convert;
 import visad.browser.Divider;
-
-import visad.util.*;
-
 import visad.collab.ControlMonitorEvent;
 import visad.collab.DisplayMonitor;
 import visad.collab.DisplayMonitorImpl;
 import visad.collab.DisplaySync;
 import visad.collab.DisplaySyncImpl;
 import visad.collab.MonitorEvent;
-
+import visad.util.AnimationWidget;
+import visad.util.ContourWidget;
+import visad.util.GMCWidget;
+import visad.util.LabeledColorWidget;
+import visad.util.RangeWidget;
+import visad.util.SelectRangeWidget;
+import visad.util.VisADSlider;
 
 /**
    DisplayImpl is the abstract VisAD superclass for display
@@ -2787,8 +2802,9 @@ System.out.println("initialize = " + initialize + " go = " + go +
    * @param transy translation along y axis
    * @param transz translation along z axis
    *
-   * @return 
+   * @return projection matrix
    */
+  
   public double[] make_matrix(double rotx, double roty, double rotz,
                               double scale, double transx, double transy,
                               double transz) {

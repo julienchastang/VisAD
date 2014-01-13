@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -487,7 +487,11 @@ public class DisplayImplJ3D extends DisplayImpl {
     array.setCapability(GeometryArray.ALLOW_FORMAT_READ);
     array.setCapability(GeometryArray.ALLOW_NORMAL_READ);
     array.setCapability(GeometryArray.ALLOW_TEXCOORD_READ);
-    
+    /* TDR (2013-10-12): Should only be used in conjunction with GeometryArray.updateData 
+       which is not currently implemented
+    array.setCapability(GeometryArray.ALLOW_REF_DATA_WRITE);
+    */
+
     // only used when using BY_REFERENCE, so just set it anyways
     //array.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
   }

@@ -4,7 +4,7 @@
 
 /*
 This source file is part of the edu.wisc.ssec.mcidas package and is
-Copyright (C) 1998 - 2011 by Tom Whittaker, Tommy Jasmin, Tom Rink,
+Copyright (C) 1998 - 2014 by Tom Whittaker, Tommy Jasmin, Tom Rink,
 Don Murray, James Kelly, Bill Hibbard, Dave Glowacki, Curtis Rueden
 and others.
  
@@ -50,6 +50,7 @@ public class GMSXnav extends AREAnav
 
   private byte bParms[] = new byte[3200];
   private float subLon;
+  private float subLat;
   private float [] resLin = new float[4];
   private float [] resEle = new float[4];
   private float [] rlic = new float[4];
@@ -329,6 +330,17 @@ public class GMSXnav extends AREAnav
 
   }
 
+  /** Get the lat,lon of the subpoint if available
+  *
+  * @return double[2] {lat, lon}
+  *
+  */
+  
+  public double[] getSubpoint() {
+    return new double[] {(double)subLat, (double)subLon};
+  }
+
+
   /**
    *
    * sv0100 converts 4 or 6 byte byte values to double
@@ -471,6 +483,7 @@ public class GMSXnav extends AREAnav
     elmis[1][2] = (float) sv0100(4, 10, b, 102);
     elmis[2][2] = (float) sv0100(4,  7, b, 106);
     subLon = (float) sv0100(6,  6, b, 198);
+    subLat = (float) sv0100(6,  6, b, 204);
 
     for (i = 0; i < 10; i++) {
       // long form
@@ -522,11 +535,10 @@ public class GMSXnav extends AREAnav
 
   /**
    *
-   * subLatLon descr
+   * set the sub-point Latitude and Longitude
    *
-   * @param 
+   * @param ll is the [latitude,longitude] of the sub-point
    *
-   * @return 
    *
    */
 

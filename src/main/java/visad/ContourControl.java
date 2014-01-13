@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -26,7 +26,7 @@ MA 02111-1307, USA
 
 package visad;
 
-import java.rmi.*;
+import java.rmi.RemoteException;
 import java.util.StringTokenizer;
 
 import visad.browser.Convert;
@@ -46,6 +46,11 @@ public class ContourControl extends Control {
   public static final int LABEL_FREQ_MED = 5;
   public static final int LABEL_FREQ_HI = 9;
   
+  // default and (somewhat arbitrary) values for labeling every Nth line
+  public static final int EVERY_NTH_MIN = 0;
+  public static final int EVERY_NTH_DEFAULT = 2;
+  public static final int EVERY_NTH_MAX = 100;
+  
   private boolean mainContours;
   // for 3-D mainContours
   private float surfaceValue;
@@ -57,6 +62,7 @@ public class ContourControl extends Control {
   private float base;
   private boolean labels;
   private int labelFreq = LABEL_FREQ_LO;
+  private int everyNth = EVERY_NTH_DEFAULT;
 
   private boolean public_set = false; // application called setLevels()
 
@@ -747,6 +753,35 @@ public class ContourControl extends Control {
   }
   
   /**
+   * @return the everyNth
+   */
+  
+  public int getEveryNth() {
+	  return everyNth;
+  }
+
+  /**
+   * Set how often we label lines 
+   * @param lineCount  how many lines to skip before next labeled line
+   * @throws VisADException  a VisAD error occurred
+   * @throws RemoteException  an RMI error occurred
+   */
+  
+  public void setEveryNth(int lineCount) throws VisADException, RemoteException {
+	  synchronized (this) {
+		  // bounds check the setter value, if out of range set to bounds
+		  if (lineCount < 1) {
+			  everyNth = EVERY_NTH_DEFAULT;
+		  } else if (lineCount > EVERY_NTH_MAX) {
+			  everyNth = EVERY_NTH_MAX;
+		  } else {
+			  everyNth = lineCount;
+		  }
+	  }
+	  changeControl(true);
+  }
+
+/**
    * set size for label auto-size
    * @param factor  new size for label auto-size
    * @throws VisADException  a VisAD error occurred
@@ -756,7 +791,7 @@ public class ContourControl extends Control {
   public void setLabelSize(double factor)
   throws VisADException, RemoteException {
 	  synchronized (this) {
-		  labelSizeFactor *= factor;
+		  labelSizeFactor = factor;
 	  }
 	  changeControl(true);
   }

@@ -4,7 +4,7 @@
 
 /*
 This source file is part of the edu.wisc.ssec.mcidas package and is
-Copyright (C) 1998 - 2011 by Tom Whittaker, Tommy Jasmin, Tom Rink,
+Copyright (C) 1998 - 2014 by Tom Whittaker, Tommy Jasmin, Tom Rink,
 Don Murray, James Kelly, Bill Hibbard, Dave Glowacki, Curtis Rueden
 and others.
 
@@ -412,7 +412,7 @@ public final class AreaFileFactory {
    * @param band the 1-based band number for the subset, which must be present
    *             in the directory blocks band map or -1 for the first band
    *
-   * @return
+   * @return the AreaFile instance
    *
    * @throws AreaFileException
    */

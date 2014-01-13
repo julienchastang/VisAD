@@ -1,6 +1,6 @@
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -40,12 +40,11 @@ public interface DataInputSource
      * Opens an existing dataset.
      *
      * @param spec		The specification of the existing dataset.
-     * @return			The VisAD data object corresponding to the
-     *				specified dataset.
      * @throws BadFormException	The DODS dataset is corrupt.
      * @throws VisADException	VisAD failure.
      * @throws RemoteException	Java RMI failure.
      */
+	
     void open(String spec)
 	throws BadFormException, RemoteException, VisADException;
 }

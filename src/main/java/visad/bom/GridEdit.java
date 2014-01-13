@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -71,7 +71,7 @@ import java.rmi.*;
 */
 public class GridEdit extends Object implements ActionListener {
 
-  private boolean debug = true;
+  private boolean debug = false;
 
   private Field grids = null;
   private DisplayImpl display = null;

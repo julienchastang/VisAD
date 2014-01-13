@@ -1,6 +1,6 @@
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -22,15 +22,24 @@ MA 02111-1307, USA
 
 package visad.data.dods;
 
-import dods.dap.*;
-import dods.dap.parser.ParseException;
-import java.io.*;
-import java.net.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
-import visad.*;
+
+import visad.DataImpl;
+import visad.VisADException;
 import visad.data.BadFormException;
-import visad.data.in.*;
+import visad.data.in.DataInputSource;
+
+import dods.dap.AttributeTable;
+import dods.dap.BaseType;
+import dods.dap.DAS;
+import dods.dap.DConnect;
+import dods.dap.DODSException;
+import dods.dap.parser.ParseException;
 
 /**
  * Provides support for generating a stream of VisAD data objects from a DODS
@@ -74,12 +83,11 @@ public class DODSSource
      *
      * @param spec              The URL string specification of the DODS dataset
      *                          The path component should have a ".dods" suffix.
-     * @return                  The VisAD data object corresponding the DODS
-     *                          dataset specification.
      * @throws BadFormException The DODS dataset is corrupt.
      * @throws VisADException   VisAD failure.
      * @throws RemoteException  Java RMI failure.
      */
+    
     public synchronized void open(String spec)
         throws BadFormException, RemoteException, VisADException
     {

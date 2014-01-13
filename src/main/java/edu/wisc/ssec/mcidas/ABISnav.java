@@ -4,7 +4,7 @@
 
 /*
 This source file is part of the edu.wisc.ssec.mcidas package and is
-Copyright (C) 1998 - 2011 by Tom Whittaker, Tommy Jasmin, Tom Rink,
+Copyright (C) 1998 - 2014 by Tom Whittaker, Tommy Jasmin, Tom Rink,
 Don Murray, James Kelly, Bill Hibbard, Dave Glowacki, Curtis Rueden
 and others.
 
@@ -75,7 +75,7 @@ public class ABISnav extends AREAnav {
   int itype, lpsi2;
 
   /** some more constants */
-  double h, re, a, rp, pi, cdr, crd, deltax, deltay, rflon;
+  double h, re, a, rp, cdr, crd, deltax, deltay, rflon;
 
   /** params */
   int[] ioff = new int[3];
@@ -134,9 +134,8 @@ public class ABISnav extends AREAnav {
       h = 42164 - re;
       a = 1. / 297.;
       rp = re / (1. + a);
-      pi = 3.141592653;
-      cdr = pi / 180.;
-      crd = 180. / pi;
+      cdr = Math.PI / 180.;
+      crd = 180. / Math.PI;
       lpsi2 = 1;
       double angle=17.76;
       nstep = 5535.;

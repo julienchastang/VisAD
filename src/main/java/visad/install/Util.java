@@ -1,6 +1,6 @@
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -244,8 +244,8 @@ public class Util
    * and a <i>target</i> of <tt>/bar</tt>, when this method exits
    * <tt>/bar</tt> will contain <tt>/bar/a</tt> and <tt>/bar/b</tt>.
    *
-   * @param progess if non-null, this progress monitor is updated
-   *                with the name of each file as it is copied.
+   * @param progress if non-null, this progress monitor is updated
+   *                 with the name of each file as it is copied.
    * @param source source jar file
    * @param target directory
    * @param saveSuffix if non-null, pre-existing files in <i>target</i>
@@ -255,6 +255,7 @@ public class Util
    *
    * @return false if any problems were encountered.
    */
+  
   public static final boolean copyJar(ProgressMonitor progress,
                                       File source, File target,
                                       String saveSuffix)
@@ -358,7 +359,6 @@ public class Util
 
     byte buffer[]  = new byte[1024];
     try {
-      long totalBytes = 0;
       while (true) {
         int n = in.read(buffer);
 

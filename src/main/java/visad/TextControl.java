@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -27,10 +27,10 @@ MA 02111-1307, USA
 package visad;
 
 import java.awt.Font;
-import visad.util.HersheyFont;
-import java.text.*;
-import java.rmi.*;
+import java.rmi.RemoteException;
+import java.text.NumberFormat;
 
+import visad.util.HersheyFont;
 import visad.util.Util;
 
 /**
@@ -44,6 +44,10 @@ public class TextControl extends Control {
   //private boolean center = false;
 
   private double size = 1.0;
+
+  private double factor = 1.0;
+
+  private double autoSizeFactor = 1.0;
 
   // WLH 31 May 2000
   // draw on sphere surface
@@ -241,8 +245,7 @@ public class TextControl extends Control {
    *
    * Possible values are TextControl.Justification.TOP,
    * TextControl.Justification.CENTER and TextControl.Justification.BOTTOM
-   *
-   * @author abcd 19 March 2003
+   * 
    */
   public void setVerticalJustification(Justification newJustification)
          throws VisADException, RemoteException
@@ -257,7 +260,6 @@ public class TextControl extends Control {
   /**
    * Return the vertical justification value
    *
-   * @author abcd 19 March 2003
    */
   public Justification getVerticalJustification()
   {
@@ -267,10 +269,18 @@ public class TextControl extends Control {
   /** set the size of characters; the default is 1.0 */
   public void setSize(double s)
          throws VisADException, RemoteException {
-    size = s;
+    factor = s;
+    size = factor*autoSizeFactor;
     changeControl(true);
   }
 
+  private void setSizeForAuto(double autoSizeFactor)
+          throws VisADException, RemoteException {
+    this.autoSizeFactor = autoSizeFactor;
+    size = factor*autoSizeFactor;
+    changeControl(true);
+  }
+  
   /** return the size */
   public double getSize() {
     return size;
@@ -606,7 +616,6 @@ public class TextControl extends Control {
     private TextControl text_control;
     private double base_scale = 1.0;
     private float last_cscale = 1.0f;
-    private double base_size = 1.0;
     private boolean active = false;
 
     ProjectionControlListener(MouseBehavior m, TextControl t,
@@ -633,14 +642,13 @@ public class TextControl extends Control {
         pfirst = false;
         base_scale = scale[2];
         last_cscale = 1.0f;
-        base_size = text_control.getSize();
       }
       else {
         float cscale = (float) (base_scale / scale[2]);
         float ratio = cscale / last_cscale;
         if (ratio < 0.95f || 1.05f < ratio) {
           last_cscale = cscale;
-          text_control.setSize(base_size * cscale);
+          text_control.setSizeForAuto(cscale);
         }
       }
     }

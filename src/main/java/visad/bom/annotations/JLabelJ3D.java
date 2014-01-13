@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2009 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -181,11 +181,11 @@ public class JLabelJ3D implements ScreenAnnotation
   }
 
   /**
-   *  Make the JLabelJ3D into a {@link Shape3D}.
+   *  Make the JLabelJ3D into a {@link javax.media.j3d.Shape3D}.
    *
    *  @param display  the VisAD display for this Label.
    *
-   *  @return the JLabelJ3D description as a {@link Shape3D}.
+   *  @return the JLabelJ3D description as a {@link javax.media.j3d.Shape3D}.
    *  
    *  @throws VisADException - VisAD couldn't make the geometry array.
    */

@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -26,7 +26,6 @@ MA 02111-1307, USA
 
 package visad.util;
 
-
 import visad.VisADException;
 
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import java.rmi.RemoteException;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.List;
-
 
 /**
  * This class provides support for running a collection of Runnables
@@ -48,7 +46,7 @@ import java.util.List;
 public class ThreadManager {
 
   /**           */
-  private String name = "TreadManager";
+  private String name = "ThreadManager";
 
   /**           */
   private static int maxThreads = 1;
@@ -95,10 +93,11 @@ public class ThreadManager {
   }
 
   /**
-   * 
+   * Constructor with name specified
    *
-   * @param name 
+   * @param theName 
    */
+  
   public ThreadManager(String theName) {
     this.name = theName;
     if (maxThreads <= 0) {
@@ -191,8 +190,9 @@ public class ThreadManager {
   /**
    * 
    *
-   * @return 
+   * @return count of Runnables
    */
+  
   public int getNumRunnables() {
     return runnables.size();
   }

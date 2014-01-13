@@ -4,7 +4,7 @@
 
 /*
 
-The software in this file is Copyright(C) 2011 by Tom Whittaker.
+The software in this file is Copyright(C) 2014 by Tom Whittaker.
 It is designed to be used with the VisAD system for interactive
 analysis and visualization of numerical data.
 
@@ -287,6 +287,12 @@ public class AreaAdapter {
   
   private AreaFile af;
 
+  /** Get the instance of the AreaFile used herein.  Do NOT attempt
+    * to then use the AreaFile.getData() method!!  Use this AreaAdapter's 
+    * getData() method to fetch the FlatField containing the data values.
+    *
+    * @return the instance of the AreaFile
+    */
   public AreaFile getAreaFile() {
        return af;
    }
@@ -676,7 +682,7 @@ public class AreaAdapter {
    * McIDAS Programmer's Manual</a>
    * @see #getImageStartTime()
    *
-   * @ returns  nominal image time
+   * @return  nominal image time
    */
   public DateTime getNominalTime()
       throws VisADException
@@ -691,7 +697,7 @@ public class AreaAdapter {
    * McIDAS Programmer's Manual</a>
    * @see #getNominalTime()
    *
-   * @ returns  time of the start of the image scan
+   * @return  time of the start of the image scan
    */
   public DateTime getImageStartTime()
       throws VisADException

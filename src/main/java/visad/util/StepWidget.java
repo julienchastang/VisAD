@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -40,7 +40,7 @@ public class StepWidget extends JPanel
   implements ActionListener, ChangeListener
 {
 
-  protected static final boolean DEBUG = true;
+  protected static final boolean DEBUG = false;
   private static final int BUTTON_WIDTH = 25;
   private static final int BUTTON_HEIGHT = 25;
   private static final int GAP = 5;

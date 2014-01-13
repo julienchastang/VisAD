@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -37,12 +37,12 @@ public interface SimpleSetIface
    *
    * @param values              An array of points. <code>value[i][j]</code> is
    *                            the i-th coordinate of the j-th points.
-   * @return indices            Indices of the neighboring samples in the set.
+   * @param indices             Indices of the neighboring samples in the set.
    *                            If the j-th points lies within the set, then
    *                            returned element [i][j] is the index of the
    *                            i-th neighboring sample in the set; otherwise,
    *                            returned array [j] is <code>null</code>.
-   * @return weights            Weights for interpolating the neighboring
+   * @param weights             Weights for interpolating the neighboring
    *                            samples in the set.  If the j-th points lies
    *                            within the set, then returned element [i][j]
    *                            is the weight of the i-th neighboring sample

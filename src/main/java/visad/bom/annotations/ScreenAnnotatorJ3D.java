@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2009 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -83,13 +83,15 @@ public class ScreenAnnotatorJ3D extends ScreenAnnotator
     }
   } // makeVisible
 
-  /**
-   *  Traverses all the data objects and transforms them into
-   *  {@link Shape3D} objects and adds them to a BranchGoup which it 
-   *  then attaches to the scene graph.
-   *
-   *  @throws VisADException if {@link LabelJ3D} throws the exception.
-   */
+	/**
+	 * Traverses all the data objects and transforms them into
+	 * {@link javax.media.j3d.Shape3D} objects and adds them to a BranchGoup
+	 * which it then attaches to the scene graph.
+	 * 
+	 * @throws VisADException
+	 *             if {@link LabelJ3D} throws the exception.
+	 */
+  
   public void draw()
     throws VisADException
   {

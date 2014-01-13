@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -179,13 +179,14 @@ public abstract class ScalarType extends MathType implements Comparable {
     return Name;
   }
 
-  /**
-   * Returns the alias of this instance or <code>null</code> if this instance
-   * has no alias.  This method returns the alias set by the most recent {@link
-   * alias(String)} invocation.
-   *
-   * @return                      The alias or <code>null</code>.
-   */
+	/**
+	 * Returns the alias of this instance or <code>null</code> if this instance
+	 * has no alias. This method returns the alias set by the most recent
+	 * {@link #alias(String)} invocation.
+	 * 
+	 * @return The alias or <code>null</code>.
+	 */
+  
   public final String getAlias() {
     synchronized(getClass()) {
       return (String)ReverseTranslations.get(Name);

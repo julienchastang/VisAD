@@ -4,7 +4,7 @@
 
 /*
 This source file is part of the edu.wisc.ssec.mcidas package and is
-Copyright (C) 1998 - 2011 by Tom Whittaker, Tommy Jasmin, Tom Rink,
+Copyright (C) 1998 - 2014 by Tom Whittaker, Tommy Jasmin, Tom Rink,
 Don Murray, James Kelly, Bill Hibbard, Dave Glowacki, Curtis Rueden
 and others.
  
@@ -207,7 +207,7 @@ public abstract class AREAnav
 
     /** converts from satellite coordinates to latitude/longitude.
      * This implementation converts the input array to doubles
-     * and calls the double signature of {@link toLatLon(double[][])}.
+     * and calls the double signature of {@link #toLatLon(double[][])}.
      * Subclasses should implement a real float version for better
      * performance.
      *
@@ -228,7 +228,7 @@ public abstract class AREAnav
     /**
      * toLinEle converts lat/long to satellite line/element
      * This implementation converts the input array to doubles
-     * and calls the double signature of {@link toLineEle(double[][])}.
+     * and calls the double signature of {@link #toLinEle(double[][])}.
      * Subclasses should implement a real float version for better
      * performance.
      *
@@ -639,7 +639,7 @@ public abstract class AREAnav
     }
     catch (IllegalArgumentException excp)
     {
-        throw new McIDASException( "Wrong nav block passed to AREAnav module");
+        throw new McIDASException( "Wrong nav block passed to AREAnav module:"+excp);
     }
     return anav;
   }

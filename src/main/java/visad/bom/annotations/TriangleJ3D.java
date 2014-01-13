@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2009 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -184,7 +184,7 @@ public class TriangleJ3D implements ScreenAnnotation
   }
 
   /**
-   *  Make the TriangleJ3D into a {@link Shape3D}.
+   *  Make the TriangleJ3D into a {@link javax.media.j3d.Shape3D}.
    *
    *  @param display  the VisAD display for this Triangle.
    *

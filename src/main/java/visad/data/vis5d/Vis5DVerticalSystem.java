@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -68,7 +68,7 @@ public class Vis5DVerticalSystem
    * @param vert_args array of vertical level values
    * @throws VisADException  unknown vert_sys or problem creating VisAD
    *                         objects.
-   * @see visad.data.vis5d.V5DStruct.VertArgs for explanation of vertical
+   * @see visad.data.vis5d.V5DStruct#VertArgs for explanation of vertical
    *      coordinates.
    */
   public Vis5DVerticalSystem( int vert_sys,

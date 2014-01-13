@@ -4,7 +4,7 @@
 
 /*
 This source file is part of the edu.wisc.ssec.mcidas package and is
-Copyright (C) 1998 - 2011 by Tom Whittaker, Tommy Jasmin, Tom Rink,
+Copyright (C) 1998 - 2014 by Tom Whittaker, Tommy Jasmin, Tom Rink,
 Don Murray, James Kelly, Bill Hibbard, Dave Glowacki, Curtis Rueden
 and others.
  
@@ -125,7 +125,8 @@ public final class CalibratorFactory {
    * <a href="http://www.ssec.wisc.edu/mcidas/doc/users_guide/current/app_c-1.html">Appendix C</a>
    * @return True if there is an implemented <code>Calibrator</code>, false
    *         otherwise.
-   * @see The McIDAS Users Guide 
+   *
+   * see The McIDAS Users Guide 
    */
   public final static boolean hasCalibrator(int id) {
     switch (id) {

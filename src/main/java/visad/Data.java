@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -26,7 +26,7 @@ MA 02111-1307, USA
 
 package visad;
 
-import java.rmi.*;
+import java.rmi.RemoteException;
 
 /**
    Data is the top-level interface of the VisAD data hierarchy.
@@ -1001,7 +1001,7 @@ public interface Data extends Thing {
   /**
    * compute ranges of values in this of given RealTypes, using
    * a dummy DisplayImplJ2D
-   * @params reals array of RealTypes whose value ranges to compute
+   * @param reals array of RealTypes whose value ranges to compute
    * @return double[reals.length][2] giving the low and high value
    *         in this for each RealType in reals
    * @throws VisADException a VisAD error occurred

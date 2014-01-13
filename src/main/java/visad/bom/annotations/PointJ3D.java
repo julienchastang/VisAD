@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2009 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -37,7 +37,7 @@ import visad.java3d.DisplayImplJ3D;
  */
 public class PointJ3D implements ScreenAnnotation
 {
-  private int style;
+
   private int x1, y1;    // point in screen coordinates
   private float[] colour;
   private double zValue;
@@ -132,7 +132,7 @@ public class PointJ3D implements ScreenAnnotation
   }
 
   /**
-   *  Make the PointJ3D into a {@link Shape3D}.
+   *  Make the PointJ3D into a {@link javax.media.j3d.Shape3D}.
    *
    *  @param display  the VisAD display for this Point.
    *

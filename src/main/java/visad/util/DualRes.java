@@ -4,7 +4,7 @@
 
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -39,7 +39,7 @@ import visad.*;
 public class DualRes {
 
   /** Debugging flag. */
-  public static boolean DEBUG = true;
+  public static boolean DEBUG = false;
 
   /** High-resolution data reference. */
   protected DataReferenceImpl hi_ref;

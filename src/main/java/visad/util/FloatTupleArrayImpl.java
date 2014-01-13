@@ -1,6 +1,6 @@
 /*
 VisAD system for interactive analysis and visualization of numerical
-data.  Copyright (C) 1996 - 2011 Bill Hibbard, Curtis Rueden, Tom
+data.  Copyright (C) 1996 - 2014 Bill Hibbard, Curtis Rueden, Tom
 Rink, Dave Glowacki, Steve Emmerson, Tom Whittaker, Don Murray, and
 Tommy Jasmin.
 
@@ -76,8 +76,9 @@ public class FloatTupleArrayImpl implements FloatTupleArray {
    * added the array is continually grown until there is room.
    * @param values Source array.
    * @param start index in the source array to start at
-   * @param number of values to add.
+   * @param num number of values to add.
    */
+  
   public void add(float[][] values, int start, int num) {
 
     int spaceLeft = this.elements[0].length - size;
